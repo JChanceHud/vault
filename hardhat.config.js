@@ -8,12 +8,12 @@ require('@atixlabs/hardhat-time-n-mine')
 module.exports = {
   solidity: {
     version: "0.8.11",
-    // settings: {
-    //   optimizer: {
-    //     enabled: true,
-    //     runs: 99999,
-    //   }
-    // }
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 99999,
+      }
+    }
   },
   networks: {
     goerli: {

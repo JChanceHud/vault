@@ -40,8 +40,8 @@ contract Vault {
 
   // Make sure the user has permission and has waited long enough
   function requireActiveUser(address user, Permission perm) public view {
-    require(users[user] >= perm, 'nau');
-    require(userActive[user] < block.timestamp, 'na');
+    require(users[user] >= perm);
+    require(userActive[user] < block.timestamp);
   }
 
   function requireActiveLiquidation() public view {
@@ -52,6 +52,12 @@ contract Vault {
     requireActiveUser(msg.sender, Permission.Partial);
     users[user] = perm;
     userActive[user] = block.timestamp + ADD_USER_TIME;
+  }
+
+  function removeUser(address user) public {
+    requireActiveUser(msg.sender, Permission.Partial);
+    users[user] = Permission.None;
+    userActive[user] = 0;
   }
 
   function withdrawEther(uint amount, address destination) public {

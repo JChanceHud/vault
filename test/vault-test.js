@@ -51,6 +51,39 @@ describe('Vault', function () {
     } catch (err) {}
   })
 
+  it('should remove user', async () => {
+    const [ fullUser, partialUser, liquidateUser, test1, test2 ] = await ethers.getSigners()
+    const { vault } = await getDeployedContracts([fullUser.address], [partialUser.address], [liquidateUser.address])
+    const ADD_USER_TIME = +(await vault.ADD_USER_TIME()).toString()
+
+    {
+      const tx = await vault.connect(partialUser).addUser(test1.address, FULL_USER)
+      await tx.wait()
+    }
+    try {
+      const tx = await vault.connect(test1).removeUser(partialUser.address)
+      await tx.wait()
+      assert(false)
+    } catch (err) {}
+
+    await timeAndMine.increaseTime(ADD_USER_TIME+1)
+
+    {
+      const tx = await vault.connect(test1).withdrawEther(0, test1.address)
+      await tx.wait()
+    }
+    {
+      const tx = await vault.connect(partialUser).removeUser(test1.address)
+      await tx.wait()
+    }
+
+    try {
+      const tx = await vault.connect(test1).withdrawEther(0, test1.address)
+      await tx.wait()
+      assert(false)
+    } catch (err) {}
+  })
+
   it('should withdraw ether', async () => {
     const [ fullUser, partialUser, liquidateUser, test1, test2 ] = await ethers.getSigners()
     const { vault } = await getDeployedContracts([fullUser.address], [partialUser.address], [liquidateUser.address])
@@ -118,7 +151,9 @@ describe('Vault', function () {
     const [ fullUser, partialUser, liquidateUser, test1, test2 ] = await ethers.getSigners()
     const { vault, testToken } = await getDeployedContracts([fullUser.address], [partialUser.address], [liquidateUser.address])
     const LIQUIDATION_TIME = +(await vault.LIQUIDATION_TIME()).toString()
-    const start = +new Date() / 1000
+    const ADD_USER_TIME = +(await vault.LIQUIDATION_TIME()).toString()
+    const latestBlock = await ethers.provider.getBlock('latest')
+    const start = latestBlock.timestamp
 
     try {
       const tx = await vault.connect(test1).beginLiquidation()
@@ -130,21 +165,21 @@ describe('Vault', function () {
       const tx = await vault.connect(liquidateUser).beginLiquidation()
       await tx.wait()
       const newNextLiquidation = await vault.nextLiquidation()
-      assert(+newNextLiquidation.toString() < (+new Date() / 1000) + 100 + LIQUIDATION_TIME)
+      assert(+newNextLiquidation.toString() < start + 10 + LIQUIDATION_TIME)
       assert(+newNextLiquidation.toString() > start + LIQUIDATION_TIME)
     }
     {
       const tx = await vault.connect(partialUser).beginLiquidation()
       await tx.wait()
       const newNextLiquidation = await vault.nextLiquidation()
-      assert(+newNextLiquidation.toString() < (+new Date() / 1000) + 100 + LIQUIDATION_TIME)
+      assert(+newNextLiquidation.toString() < start + 10 + LIQUIDATION_TIME)
       assert(+newNextLiquidation.toString() > start + LIQUIDATION_TIME)
     }
     {
       const tx = await vault.connect(fullUser).beginLiquidation()
       await tx.wait()
       const newNextLiquidation = await vault.nextLiquidation()
-      assert(+newNextLiquidation.toString() < (+new Date() / 1000) + 100 + LIQUIDATION_TIME)
+      assert(+newNextLiquidation.toString() < start + 10 + LIQUIDATION_TIME)
       assert(+newNextLiquidation.toString() > start + LIQUIDATION_TIME)
     }
   })
