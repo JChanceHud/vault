@@ -1,0 +1,25 @@
+{
+  "name": "vault",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:goerli": "hardhat run scripts/deploy.js --network goerli",
+    "coverage": "npm run clean && hardhat coverage && lcov-badge-generator ./coverage/lcov.info -o ./coverage/badge.svg",
+    "clean": "hardhat clean",
+    "test": "hardhat test"
+  },
+  "author": "Chance Hudson",
+  "license": "MIT",
+  "devDependencies": {
+    "@atixlabs/hardhat-time-n-mine": "^0.0.5",
+    "@nomiclabs/hardhat-ethers": "^2.0.4",
+    "@nomiclabs/hardhat-waffle": "^2.0.2",
+    "@openzeppelin/contracts": "^4.4.2",
+    "ethers": "^5.5.3",
+    "hardhat": "^2.8.3",
+    "lcov-badge-generator": "^1.0.5",
+    "solidity-coverage": "^0.7.18"
+  }
+}
